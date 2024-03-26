@@ -89,7 +89,7 @@ def create_stellate_extension(service_name: str, token: str) -> SchemaExtension:
 
     return StellateMetricsLogging
 
-def sync_schema_to_stellate(schema: strawberry.Schema, service_name: str, token: str):
+def sync_schema_to_stellate(schema, service_name: str, token: str):
     res = requests.post(
         f"https://{service_name}.stellate.sh/schema",
         data=json.dumps({ "schema": schema.introspect() }),

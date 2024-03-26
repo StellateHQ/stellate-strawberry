@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stellate-strawberry"
-version = "0.0.2"
+version = "0.0.3"
 description = "Integrate Stellate with your Strawberry GraphQL API"
 authors = ["Stellate <eng@stellate.co>"]
 readme = "README.md"
