@@ -53,24 +53,26 @@ def create_stellate_extension(service_name: str, token: str) -> SchemaExtension:
 
             result_json = json.dumps(self.get_result_dict(), indent=4)
 
-            headers = self.execution_context.context["request"].headers
-            forwarded_for = headers.get('x-forwarded-for')
+            request = self.execution_context.context["request"] if self.execution_context.context else None
+            response = self.execution_context.context["response"] if self.execution_context.context else None
+
+            forwarded_for = request.headers.get('x-forwarded-for') if request != None else None
             ips = forwarded_for.split(',') if forwarded_for != None and len(forwarded_for) > 0 else []
 
             payload = {
               "operation": self.execution_context.query,
-              "method": self.execution_context.context["request"].method,
+              "method": self.execution_context.context["request"].method if self.execution_context.context else "POST",
               "responseSize": len(result_json),
               "responseHash": create_blake3_hash(result_json),
               "elapsed": round((end - start) * 1_000),
               "operationName": self.execution_context.provided_operation_name,
               "variablesHash": create_blake3_hash(json.dumps(self.execution_context.variables or {})),
-              "ip": ips[0] if len(ips) > 0 else headers.get('true-client-ip') or headers.get('x-real-ip'),
+              "ip": ips[0] if len(ips) > 0 else request.headers.get('true-client-ip') or request.headers.get('x-real-ip') if request != None else None,
               "errors": self.execution_context.errors,
-              "statusCode": self.execution_context.context["response"].status_code or 200,
-              "userAgent": headers.get("user-agent"),
-              "referer": headers.get("referer"),
-              "hasSetCookie": "set-cookie" in self.execution_context.context["response"].headers.keys(),
+              "statusCode": self.execution_context.context["response"].status_code or 200 if self.execution_context.context != None else 200,
+              "userAgent": request.headers.get("user-agent") if request != None else None,
+              "referer": request.headers.get("referer") if request != None else None,
+              "hasSetCookie": "set-cookie" in response.headers.keys() if response != None else None,
             }
             t.queue.put(payload)
 
@@ -86,3 +88,12 @@ def create_stellate_extension(service_name: str, token: str) -> SchemaExtension:
             return map
 
     return StellateMetricsLogging
+
+def sync_schema_to_stellate(schema: strawberry.Schema, service_name: str, token: str):
+    res = requests.post(
+        f"https://{service_name}.stellate.sh/schema",
+        data=json.dumps({ "schema": schema.introspect() }),
+        headers={"stellate-schema-token": token, "content-type": "application/json"}
+    )
+    if res.status_code >= 300:
+        print(f"Failed to sync schema to Stellate: {res.text[:100]}")
