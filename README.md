@@ -12,7 +12,7 @@ pip install stellate-strawberry
 
 ## Set Up
 
-Before you can make use of this gem, you need to [set up a Stellate service](https://stellate.co/docs/quickstart#1-create-stellate-service) and [create a logging token](https://stellate.co/docs/graphql-metrics/metrics-get-started#create-your-own-logging-token).
+Before you can make use of this library, you need to [set up a Stellate service](https://stellate.co/docs/quickstart#1-create-stellate-service) and [create a logging token](https://stellate.co/docs/graphql-metrics/metrics-get-started#create-your-own-logging-token).
 
 After that, add the Stellate extension when initializing your `strawberry.Schema` object in order to add [Stellate Metrics Logging](https://stellate.co/docs/graphql-metrics/metrics-get-started#metrics-collection):
 
