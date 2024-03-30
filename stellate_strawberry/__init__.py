@@ -59,6 +59,9 @@ def create_stellate_extension(service_name: str, token: str) -> SchemaExtension:
             forwarded_for = request.headers.get('x-forwarded-for') if request != None else None
             ips = forwarded_for.split(',') if forwarded_for != None and len(forwarded_for) > 0 else []
 
+            graphql_client_name = request.headers.get('x-graphql-client-name') if request != None else None
+            graphql_client_version = request.headers.get('x-graphql-client-version') if request != None else None
+
             payload = {
               "operation": self.execution_context.query,
               "method": self.execution_context.context["request"].method if self.execution_context.context else "POST",
@@ -68,6 +71,8 @@ def create_stellate_extension(service_name: str, token: str) -> SchemaExtension:
               "operationName": self.execution_context.provided_operation_name,
               "variablesHash": create_blake3_hash(json.dumps(self.execution_context.variables or {})),
               "ip": ips[0] if len(ips) > 0 else request.headers.get('true-client-ip') or request.headers.get('x-real-ip') if request != None else None,
+              "graphqlClientName": graphql_client_name,
+              "graphqlClientVersion": graphql_client_version,
               "errors": self.execution_context.errors,
               "statusCode": self.execution_context.context["response"].status_code or 200 if self.execution_context.context != None else 200,
               "userAgent": request.headers.get("user-agent") if request != None else None,
