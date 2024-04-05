@@ -10,6 +10,11 @@ python = "^3.9"
 requests = "^2.31.0"
 
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+strawberry-graphql = "*"
+pytest-mock = "^3.14.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
