@@ -73,7 +73,7 @@ def create_stellate_extension(service_name: str, token: str) -> SchemaExtension:
               "ip": ips[0] if len(ips) > 0 else request.headers.get('true-client-ip') or request.headers.get('x-real-ip') if request != None else None,
               "graphqlClientName": graphql_client_name,
               "graphqlClientVersion": graphql_client_version,
-              "errors": self.execution_context.errors,
+              "errors": self.execution_context.result.errors,
               "statusCode": self.execution_context.context["response"].status_code or 200 if self.execution_context.context != None else 200,
               "userAgent": request.headers.get("user-agent") if request != None else None,
               "referer": request.headers.get("referer") if request != None else None,
