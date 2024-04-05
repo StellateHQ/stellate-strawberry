@@ -3,9 +3,9 @@ import queue
 import requests
 import threading
 import time
-import typing
 
 from strawberry.extensions import SchemaExtension
+from strawberry.http import process_result
 
 def create_blake3_hash(input: str) -> int:
     val = 0
@@ -51,7 +51,8 @@ def create_stellate_extension(service_name: str, token: str) -> SchemaExtension:
             yield
             end = time.time()
 
-            result_json = json.dumps(self.get_result_dict(), indent=4)
+            result = process_result(self.execution_context.result)
+            result_json = json.dumps(result, indent=4)
 
             request = self.execution_context.context["request"] if self.execution_context.context else None
             response = self.execution_context.context["response"] if self.execution_context.context else None
@@ -73,24 +74,13 @@ def create_stellate_extension(service_name: str, token: str) -> SchemaExtension:
               "ip": ips[0] if len(ips) > 0 else request.headers.get('true-client-ip') or request.headers.get('x-real-ip') if request != None else None,
               "graphqlClientName": graphql_client_name,
               "graphqlClientVersion": graphql_client_version,
-              "errors": self.execution_context.result.errors,
+              "errors": result.get("errors"),
               "statusCode": self.execution_context.context["response"].status_code or 200 if self.execution_context.context != None else 200,
               "userAgent": request.headers.get("user-agent") if request != None else None,
               "referer": request.headers.get("referer") if request != None else None,
               "hasSetCookie": "set-cookie" in response.headers.keys() if response != None else None,
             }
             t.queue.put(payload)
-
-        def get_result_dict(self):
-            result = self.execution_context.result
-            map = {}
-            if result.data != None:
-                map["data"] = result.data
-            if result.errors != None:
-                map["errors"] = result.errors
-            if result.extensions != None:
-                map["extensions"] = result.extensions
-            return map
 
     return StellateMetricsLogging
 
