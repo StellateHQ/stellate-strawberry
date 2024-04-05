@@ -1,4 +1,5 @@
 import strawberry
+from typing import Optional
 
 from stellate_strawberry import create_stellate_extension
 
@@ -10,7 +11,7 @@ class Query:
         return "world"
 
     @strawberry.field
-    def fails(self) -> str | None:
+    def fails(self) -> Optional[str]:
         raise ValueError("This is an error")
 
 
